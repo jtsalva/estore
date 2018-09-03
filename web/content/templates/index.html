@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bigman</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+</head>
+<body>
+<style>
+    :root {
+        --teal-color: #009688;
+        --teal-lighten-1-color: #26a69a;
+    }
+
+    body {
+        min-width: 340px;
+        font-family: "Roboto", sans-serif;
+
+    }
+
+    nav {
+        padding-top: 15px;
+    }
+
+    nav .brand-logo {
+        letter-spacing: 4px;
+        margin-left: 7px;
+        border-top: 2px dashed white;
+        border-bottom: 2px dashed white;
+    }
+
+    #search {
+        border: none;
+        border-radius: 3px;
+        margin-top: 10px;
+        padding-left: 40px;
+        color: lightgray;
+    }
+
+    #search:focus {
+        background-color: white !important;
+        color: black;
+    }
+
+    #searchLabel i {
+        margin-top: 5px;
+        color: lightgray;
+    }
+
+    #filters * {
+        color: black;
+    }
+
+    .filter {
+        border-bottom: 1px solid black !important;
+    }
+
+    #searchContainer {
+        margin-left: 15px;
+    }
+
+    .item {
+        position: relative;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        margin-top: 10px;
+        padding: 10px;
+        padding-top: 0;
+    }
+
+    .item:hover {
+        cursor: pointer;
+        border: 1px solid var(--teal-color);
+    }
+
+    .item .name {
+        font-size: 2em;
+        font-weight: bold;
+        display: block;
+        word-wrap: break-word;
+    }
+
+    .item img {
+        margin-top: -20px;
+        height: 200px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    .item .description {
+        font-size: 0.9em;
+        height: 85px;
+    }
+
+    .item .price {
+        font-size: 1.3em;
+        font-weight: bold;
+        position: absolute;
+        bottom: 0;
+        right: 10px;
+        border-left: 5px solid var(--teal-color);
+        padding-left: 5px;
+    }
+</style>
+
+<nav class="nav-extended teal">
+    <div class="container">
+        <div class="row">
+            <div class="col s5 m2">
+                <a href="" class="brand-logo left">Bigman</a>
+            </div>
+            <div class="col s7 hide-on-med-and-up" style="padding-bottom: 15px;">
+                <a class="waves-effect waves-light btn teal lighten-1" style="width: 100%;">login</a>
+            </div>
+            <div class="col s10 m8 input-field" id="searchContainer">
+                <input id="search" type="search" placeholder="type to search" autocomplete="off" class="teal lighten-1">
+                <label id="searchLabel" class="label-icon" for="search"><i class="material-icons">search</i></label>
+            </div>
+            <div class="col m1 hide-on-small-and-down" style="padding-left: 40px;">
+                <a class="waves-effect waves-light btn teal lighten-1">login</a>
+            </div>
+        </div>
+    </div>
+    <div class="nav-content white">
+        <div class="container">
+            <div id="filters" class="row">
+                <div class="col m3 s12">
+                    <div class="input-field">
+                        <select class="filter" id="filterSort">
+                            <option value="" disabled selected>Sort</option>
+                            <option value="1">Price Ascending</option>
+                            <option value="2">Price Descending</option>
+                            <option value="3">Alphabetical Asending</option>
+                            <option value="4">Alphabetical Descending</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col m3 s12">
+                    <div class="input-field">
+                        <select class="filter" id="filterCategory" multiple>
+                            <option value="" disabled selected>Category</option>
+                            {{ range .Categories }}
+                            <option value="{{ .Id }}">{{ .Name }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+                <div class="col m3 s12">
+                    <div class="input-field">
+                        <input class="filter" placeholder="min" id="filterMin" type="number">
+                    </div>
+                </div>
+                <div class="col m3 s12">
+                    <div class="input-field">
+                        <input class="filter" placeholder="min" id="filterMax" type="number">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row" id="items">
+        {{ range .Items }}
+        <div class="col l4 m6 s12">
+            <div class="item" data-id="{{ .Id }}" data-categoryId="{{ .CategoryId }}">
+                <p class="name">{{ .Name }}</p>
+                <img src="/static/img/choc.jpg" alt="">
+                <p class="description">{{ .Description }}</p>
+                <p class="price">£{{ .Price }}</p>
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+    <script>
+        function updateItemHeight() {
+            var itemHeight = 0;
+
+            $(".item").each(function() {
+                const height = $(this).outerHeight();
+                if (height > itemHeight) {
+                    itemHeight = height;
+                }
+            });
+
+            $(".item").height(itemHeight);
+
+            var nameHeight = 0;
+
+            $(".item .name").each(function() {
+                const height = $(this).outerHeight();
+                if (height > nameHeight) {
+                    nameHeight = height;
+                }
+            });
+
+            $(".item .name").height(nameHeight);
+        }
+
+        $(document).ready(function() {
+            M.AutoInit();
+
+            updateItemHeight();
+        });
+    </script>
+</body>
+</html>
