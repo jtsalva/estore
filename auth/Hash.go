@@ -1,9 +1,18 @@
 package auth
 
 import (
+	"crypto/rand"
+
 	"golang.org/x/crypto/argon2" // Requires golang.org/x/crypto/blake2b
-		"crypto/rand"
-		)
+)
+
+const (
+	SALTLENGTH int    = 25
+	TIME       uint32 = 3
+	MEMORY     uint32 = 32 * 1024
+	THREADS    uint8  = 1
+	KEYLENGTH  uint32 = 64
+)
 
 func generateSalt() ([]byte, error) {
 	s := make([]byte, SALTLENGTH)
