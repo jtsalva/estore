@@ -7,6 +7,10 @@ import (
 )
 
 func Trace(err error) error {
+	if err == nil {
+		return nil
+	}
+
 	pc := make([]uintptr, 10)
 	runtime.Callers(2, pc)
 	f := runtime.FuncForPC(pc[0])
