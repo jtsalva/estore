@@ -1,9 +1,9 @@
 package faults
 
 import (
-	"errors"
-	"fmt"
 	"runtime"
+
+	"github.com/pkg/errors"
 )
 
 func Trace(err error) error {
@@ -14,5 +14,9 @@ func Trace(err error) error {
 	pc := make([]uintptr, 10)
 	runtime.Callers(2, pc)
 	f := runtime.FuncForPC(pc[0])
-	return errors.New(fmt.Sprintf("%s: %s", f.Name(), err.Error()))
+	return errors.Wrap(err, f.Name())
+}
+
+func New(message string) error {
+	return Trace(message)
 }
