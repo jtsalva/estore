@@ -30,9 +30,9 @@ CREATE TABLE `Users` (
 CREATE TABLE `Items` (
     `ItemId` INT NOT NULL AUTO_INCREMENT,
     `Name` VARBINARY(75) NOT NULL,
-    `Description` VARBINARY(8000),
+    `Description` VARBINARY(8000) DEFAULT "",
     `Price` DECIMAL(13, 4) NOT NULL,
-    `Category` INT,
+    `Category` INT DEFAULT 1,
     PRIMARY KEY (`ItemId`),
     FOREIGN KEY (`Category`) REFERENCES Categories(`CategoryId`)
 );
@@ -45,8 +45,8 @@ CREATE TABLE `Orders` (
 );
 
 CREATE TABLE `SoldItems` (
-    `ItemId` INT,
-    `OrderId` INT,
+    `ItemId` INT NOT NULL,
+    `OrderId` INT NOT NULL,
     `Quantity` SMALLINT NOT NULL,
     PRIMARY KEY (`ItemId`, `OrderId`),
     FOREIGN KEY (`ItemId`) REFERENCES Items(`ItemId`),
@@ -54,8 +54,8 @@ CREATE TABLE `SoldItems` (
 );
 
 CREATE TABLE `ItemTags` (
-    `ItemId` INT,
-    `TagId` INT,
+    `ItemId` INT NOT NULL,
+    `TagId` INT NOT NULL,
     PRIMARY KEY (`ItemId`, `TagId`),
     FOREIGN KEY (`ItemId`) REFERENCES Items(`ItemId`),
     FOREIGN KEY (`TagId`) REFERENCES Tags(`TagId`)
