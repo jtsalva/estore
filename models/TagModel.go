@@ -1,9 +1,9 @@
 package models
 
-type tags struct {}
+type tags struct{}
 
 type Tag struct {
-	Id int64 `db:"TagId" json:"id"`
+	Id   int64  `db:"TagId" json:"id"`
 	Name string `db:"Name" json:"name"`
 }
 

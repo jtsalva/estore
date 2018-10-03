@@ -1,9 +1,9 @@
 package models
 
-type roles struct {}
+type roles struct{}
 
 type Role struct {
-	Id int64 `db:"RoleId" json:"id"`
+	Id   int64  `db:"RoleId" json:"id"`
 	Name string `db:"Name" json:"name"`
 }
 

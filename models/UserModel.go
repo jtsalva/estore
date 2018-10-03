@@ -1,21 +1,22 @@
 package models
 
 import (
-		"time"
-	"upper.io/db.v3"
-	"github.com/jtsalva/estore/auth"
 	"errors"
+	"time"
+
+	"github.com/jtsalva/estore/auth"
+	"upper.io/db.v3"
 )
 
-type users struct {}
+type users struct{}
 
 type User struct {
-	Id int64 `db:"UserId" json:"id"`
-	Name string `db:"Name" json:"name"`
-	Email string `db:"Email" json:"email"`
-	Password string `db:"Password" json:"-"` // Omit from json - otherwise can be accessed via api
+	Id         int64     `db:"UserId" json:"id"`
+	Name       string    `db:"Name" json:"name"`
+	Email      string    `db:"Email" json:"email"`
+	Password   string    `db:"Password" json:"-"` // Omit from json - otherwise can be accessed via api
 	DataJoined time.Time `db:"DateJoined" json:"dateJoined"`
-	RoleId int64 `db:"Role" json:"roleId"`
+	RoleId     int64     `db:"Role" json:"roleId"`
 }
 
 var Users users
@@ -31,12 +32,15 @@ func (u *users) GetById(id int64) (*User, error) {
 }
 
 func (u *users) GetByEmail(email string) (*User, error) {
-	sess := newSession()
-	defer sess.Close()
-
 	var user User
 
-	err := sess.SelectFrom(UsersTable).Where(db.Cond{"Email": email}).One(&user)
+	sess, err := newSession()
+	if err != nil {
+		return &user, err
+	}
+	defer sess.Close()
+
+	err = sess.SelectFrom(UsersTable).Where(db.Cond{"Email": email}).One(&user)
 	return &user, err
 }
 
@@ -57,12 +61,15 @@ func (u *users) RemoveById(id int64) error {
 }
 
 func (u *User) Role() (Role, error) {
-	sess := newSession()
-	defer sess.Close()
-
 	var role Role
 
-	err := sess.SelectFrom(RolesTable).Where(db.Cond{"RoleId": u.RoleId}).One(&role)
+	sess, err := newSession()
+	if err != nil {
+		return role, err
+	}
+	defer sess.Close()
+
+	err = sess.SelectFrom(RolesTable).Where(db.Cond{"RoleId": u.RoleId}).One(&role)
 	return role, err
 }
 

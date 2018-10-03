@@ -1,9 +1,9 @@
 package models
 
-type categories struct {}
+type categories struct{}
 
 type Category struct {
-	Id int64 `db:"CategoryId"`
+	Id   int64  `db:"CategoryId"`
 	Name string `db:"Name"`
 }
 

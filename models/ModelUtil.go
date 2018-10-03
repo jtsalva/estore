@@ -1,40 +1,42 @@
 package models
 
 import (
-	"log"
-	"upper.io/db.v3/mysql"
-	"upper.io/db.v3/lib/sqlbuilder"
-		"errors"
-	"reflect"
-	"upper.io/db.v3"
+	"errors"
 	"fmt"
+	"reflect"
+
+	db "upper.io/db.v3"
+	"upper.io/db.v3/lib/sqlbuilder"
+	"upper.io/db.v3/mysql"
 )
 
 var settings = mysql.ConnectionURL{
 	Database: "store",
-	Host: "localhost",
-	User: "root",
-	// Optional Password
+	Host:     "138.68.175.121",
+	User:     "root",
+	Password: "password",
+	// Very secure way to access
+	// the database I promise
 }
 
 // Tables
 const (
-	TagsTable       string = "tags"
-	CategoriesTable string = "categories"
-	RolesTable      string = "roles"
-	UsersTable      string = "users"
-	ItemsTable      string = "items"
-	ItemsTagsTable  string = "itemtags"
+	TagsTable       string = "Tags"
+	CategoriesTable string = "Categories"
+	RolesTable      string = "Roles"
+	UsersTable      string = "Users"
+	ItemsTable      string = "Items"
+	ItemsTagsTable  string = "ItemTags"
 )
 
 // TODO: Handle no connection to database
-func newSession() sqlbuilder.Database {
+func newSession() (sqlbuilder.Database, error) {
 	sess, err := mysql.Open(settings)
 	if err != nil {
-		log.Println("newSession(): %q\n", err)
+		return sess, err
 	}
 
-	return sess
+	return sess, nil
 }
 
 // Concatenate Id onto the name of model
@@ -42,7 +44,6 @@ func idString(modelType interface{}) string {
 	return fmt.Sprintf("%sId", reflect.TypeOf(modelType).Name())
 }
 
-// Changed this so check functionality please
 func isValueEmpty(val reflect.Value) bool {
 	switch val.Kind() {
 	case reflect.String:
@@ -52,7 +53,9 @@ func isValueEmpty(val reflect.Value) bool {
 	case reflect.Float64:
 		return val.Float() == 0
 	default:
-		// Type unused in database so return true
+		// Default case indicates
+		// the type is unused within
+		// database schema
 		return true
 	}
 }
@@ -70,17 +73,20 @@ func tableName(modelType interface{}) (string, error) {
 	case User:
 		return UsersTable, nil
 	default:
-		return "", errors.New("can't find model type")
+		return "", errors.New("tableName(): invalid modelType")
 	}
 }
 
 func LinkItemWithTag(itemId int64, tagId int64) error {
-	sess := newSession()
+	sess, err := newSession()
+	if err != nil {
+		return err
+	}
 	defer sess.Close()
 
-	_, err := sess.InsertInto(ItemsTagsTable).Values(struct{
+	_, err = sess.InsertInto(ItemsTagsTable).Values(struct {
 		ItemId int64 `db:"ItemId"`
-		TagId int64 `db:"TagId"`
+		TagId  int64 `db:"TagId"`
 	}{
 		itemId,
 		tagId,
@@ -89,23 +95,30 @@ func LinkItemWithTag(itemId int64, tagId int64) error {
 }
 
 func UnlinkItemWithTag(itemId int64, tagId int64) error {
-	sess := newSession()
+	sess, err := newSession()
+	if err != nil {
+		return err
+	}
 	defer sess.Close()
 
-	_, err := sess.DeleteFrom(ItemsTagsTable).Where(
+	_, err = sess.DeleteFrom(ItemsTagsTable).Where(
 		db.And(
 			db.Cond{"ItemId": itemId},
 			db.Cond{"TagId": tagId},
-			)).Exec()
+		)).Exec()
 	return err
 }
 
 func all(modelType interface{}) (interface{}, error) {
-	sess := newSession()
+	models := reflect.New(reflect.SliceOf(reflect.TypeOf(modelType))).Interface()
+
+	sess, err := newSession()
+	if err != nil {
+		return models, err
+	}
 	defer sess.Close()
 
-	// CreateOne new slice of model type || reflect.New returns address already
-	models := reflect.New(reflect.SliceOf(reflect.TypeOf(modelType))).Interface()
+	// Create new slice of model type || reflect.New returns address
 	table, err := tableName(modelType)
 	if err != nil {
 		return models, err
@@ -116,7 +129,10 @@ func all(modelType interface{}) (interface{}, error) {
 }
 
 func getById(modelType interface{}, id int64) (interface{}, error) {
-	sess := newSession()
+	sess, err := newSession()
+	if err != nil {
+		return nil, err
+	}
 	defer sess.Close()
 
 	model := reflect.New(reflect.TypeOf(modelType)).Interface()
@@ -131,7 +147,10 @@ func getById(modelType interface{}, id int64) (interface{}, error) {
 
 // Only used by specific models
 func getByName(modelType interface{}, name string) (interface{}, error) {
-	sess := newSession()
+	sess, err := newSession()
+	if err != nil {
+		return nil, err
+	}
 	defer sess.Close()
 
 	model := reflect.New(reflect.TypeOf(modelType)).Interface()
@@ -145,7 +164,10 @@ func getByName(modelType interface{}, name string) (interface{}, error) {
 }
 
 func insert(model interface{}) error {
-	sess := newSession()
+	sess, err := newSession()
+	if err != nil {
+		return err
+	}
 	defer sess.Close()
 
 	table, err := tableName(model)
@@ -158,7 +180,10 @@ func insert(model interface{}) error {
 }
 
 func update(model interface{}) error {
-	sess := newSession()
+	sess, err := newSession()
+	if err != nil {
+		return err
+	}
 	defer sess.Close()
 
 	table, err := tableName(model)
@@ -183,14 +208,17 @@ func update(model interface{}) error {
 	if id, ok := newData[idString(model)]; ok {
 		_, err = sess.Update(table).Set(newData).Where(db.Cond{idString(model): id}).Exec()
 	} else {
-		return errors.New("missing id in update model")
+		return err
 	}
 
 	return err
 }
 
 func removeById(modelType interface{}, id int64) error {
-	sess := newSession()
+	sess, err := newSession()
+	if err != nil {
+		return err
+	}
 	defer sess.Close()
 
 	table, err := tableName(modelType)
@@ -203,7 +231,10 @@ func removeById(modelType interface{}, id int64) error {
 }
 
 func removeByName(modelType interface{}, name string) error {
-	sess := newSession()
+	sess, err := newSession()
+	if err != nil {
+		return err
+	}
 	defer sess.Close()
 
 	table, err := tableName(modelType)

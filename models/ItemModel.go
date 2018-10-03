@@ -2,17 +2,18 @@ package models
 
 import (
 	"fmt"
+
 	"upper.io/db.v3"
 )
 
-type items struct {}
+type items struct{}
 
 type Item struct {
-	Id int64 `db:"ItemId" json:"id"`
-	Name string `db:"Name" json:"name"`
+	Id          int64  `db:"ItemId" json:"id"`
+	Name        string `db:"Name" json:"name"`
 	Description string `db:"Description" json:"description"`
-	Price Price `db:"Price" json:"price"`
-	CategoryId int64 `db:"Category" json:"categoryId"`
+	Price       Price  `db:"Price" json:"price"`
+	CategoryId  int64  `db:"Category" json:"categoryId"`
 }
 
 var Items items
@@ -46,14 +47,18 @@ func (i *Item) Category() (*Category, error) {
 }
 
 func (i *Item) Tags() ([]Tag, error) {
-	sess := newSession()
+	var tags []Tag
+
+	sess, err := newSession()
+	if err != nil {
+		return tags, err
+	}
 	defer sess.Close()
 
-	var itemTagPairs []struct{
+	var itemTagPairs []struct {
 		ItemId int64 `db:"ItemId"`
-		TagId int64 `db:"TagId"`
+		TagId  int64 `db:"TagId"`
 	}
-	var tags []Tag
 
 	if err := sess.SelectFrom(ItemsTagsTable).Where(db.Cond{"ItemId": i.Id}).All(&itemTagPairs); err != nil {
 		return tags, err
