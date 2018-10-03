@@ -29,7 +29,6 @@ const (
 	ItemsTagsTable  string = "ItemTags"
 )
 
-// TODO: Handle no connection to database
 func newSession() (sqlbuilder.Database, error) {
 	sess, err := mysql.Open(settings)
 	if err != nil {
