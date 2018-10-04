@@ -14,7 +14,7 @@ func main() {
 	r.HandleFunc("/", indexHandler)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./content/static"))))
 
-	http.ListenAndServe(":8000", r)
+	http.ListenAndServe(":80", r)
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +46,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		Items []models.Item
 		Categories []models.Category
 	} {
-		Items: (*items)[:50],
+		Items: (*items)[:75],
 		Categories: *categories,
 	})
 }
