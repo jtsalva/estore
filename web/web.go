@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
-	"net/http"
 	"html/template"
 	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
 	"github.com/jtsalva/estore/models"
 )
 
@@ -12,11 +13,11 @@ const (
 	Domain string = "shop.jtsalva.space"
 
 	Certificate string = "/etc/letsencrypt/live/shop.jtsalva.space/cert.pem"
-	PrivateKey string = "/etc/letsencrypt/live/shop.jtsalva.space/privkey.pem"
+	PrivateKey  string = "/etc/letsencrypt/live/shop.jtsalva.space/privkey.pem"
 )
 
 func main() {
-	r := mux.NewRouter()
+	r := mux.NewRouter().Host(Domain)
 
 	r.HandleFunc("/", indexHandler)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./content/static"))))
@@ -32,7 +33,7 @@ func main() {
 }
 
 func redirectTLS(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "https://" + Domain + r.RequestURI, http.StatusMovedPermanently)
+	http.Redirect(w, r, "https://"+Domain+r.RequestURI, http.StatusMovedPermanently)
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -61,10 +62,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	index.Execute(w, struct {
-		Items []models.Item
+		Items      []models.Item
 		Categories []models.Category
-	} {
-		Items: (*items)[:75],
+	}{
+		Items:      (*items)[:75],
 		Categories: *categories,
 	})
 }
