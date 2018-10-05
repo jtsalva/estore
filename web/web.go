@@ -17,7 +17,7 @@ const (
 )
 
 func main() {
-	r := mux.NewRouter().Host(Domain)
+	r := mux.NewRouter().Host(Domain).Subrouter()
 
 	r.HandleFunc("/", indexHandler)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./content/static"))))
